@@ -105,6 +105,25 @@ child_data = [
     },
 ]
 
+# Calculate aggregates for the parent row
+total_area = sum(row["area_ha"] for row in child_data)
+avg_percentage = sum(row["percentage"] for row in child_data) / len(child_data)
+
+# Create parent row with calculated aggregates
+parent_row = {
+    "id": 1,
+    "region": "South America",
+    "country": "South America",
+    "year": 2023,
+    "area_ha": total_area,  # Calculated aggregate
+    "percentage": avg_percentage,  # Calculated aggregate
+    "__parent": None,
+    "__depth": 0,
+}
+
+# Combine parent and children
+data = [parent_row] + child_data
+
 # Define colors
 red = "#ff4b4b"
 green = "#21c354"
@@ -195,18 +214,16 @@ result = slickgrid(data, columns, options, key="south_america_grid")
 
 # Display summary statistics
 st.divider()
+
+st.subheader("📊 Summary Statistics")
+
 col1, col2, col3 = st.columns(3)
 
-# Calculate totals (excluding the parent row)
-child_rows = [row for row in data if row["__depth"] == 1]
-total_area = sum(row["area_ha"] for row in child_rows)
-avg_percentage = sum(row["percentage"] for row in child_rows) / len(child_rows)
-
 with col1:
-    st.metric("Total Countries", len(child_rows))
+    st.metric("Total Countries", len(child_data))
 
 with col2:
-    st.metric("Total Area", f"{total_area:,.0f} ha")
+    st.metric("Total Area (Sum)", f"{total_area:,.1f} ha")
 
 with col3:
     st.metric("Average Percentage", f"{avg_percentage:.2f}%")
@@ -214,5 +231,12 @@ with col3:
 # Show clicked row details
 if result is not None:
     row_idx, col_idx = result
+    clicked_data = data[row_idx]
     st.info(f"**Clicked Row Data:**")
-    st.json(data[row_idx])
+    st.json(clicked_data)
+    
+    # Show if it's an aggregate row or detail row
+    if clicked_data["__depth"] == 0:
+        st.success("✅ This is an **aggregate row** (parent)")
+    else:
+        st.info("📍 This is a **detail row** (child)")
