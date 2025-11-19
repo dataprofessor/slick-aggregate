@@ -9,9 +9,9 @@ from streamlit_slickgrid import (
 
 st.set_page_config(layout="wide", page_title="South America Data")
 
-st.title("South America Agricultural Data 2023")
+st.title("Americas Agricultural Data 2023")
 
-# Sample data based on the image - children first
+# Sample data based on the image - children first (without percentages initially)
 child_data = [
     {
         "id": 2,
@@ -19,7 +19,6 @@ child_data = [
         "country": "Brazil",
         "year": 2023,
         "area_ha": 55642000,
-        "percentage": 3.66,
         "__parent": 1,
         "__depth": 1,
     },
@@ -29,7 +28,6 @@ child_data = [
         "country": "Bolivia",
         "year": 2023,
         "area_ha": 5562567.6,
-        "percentage": 3.15,
         "__parent": 1,
         "__depth": 1,
     },
@@ -39,7 +37,6 @@ child_data = [
         "country": "Paraguay",
         "year": 2023,
         "area_ha": 4561000,
-        "percentage": 11.52,
         "__parent": 1,
         "__depth": 1,
     },
@@ -49,7 +46,6 @@ child_data = [
         "country": "Peru",
         "year": 2023,
         "area_ha": 3918431,
-        "percentage": 3.06,
         "__parent": 1,
         "__depth": 1,
     },
@@ -59,7 +55,6 @@ child_data = [
         "country": "Venezuela, RB",
         "year": 2023,
         "area_ha": 2600000,
-        "percentage": 2.95,
         "__parent": 1,
         "__depth": 1,
     },
@@ -69,7 +64,6 @@ child_data = [
         "country": "Colombia",
         "year": 2023,
         "area_ha": 2549300,
-        "percentage": 2.32,
         "__parent": 1,
         "__depth": 1,
     },
@@ -79,7 +73,6 @@ child_data = [
         "country": "Uruguay",
         "year": 2023,
         "area_ha": 2199600,
-        "percentage": 12.57,
         "__parent": 1,
         "__depth": 1,
     },
@@ -89,7 +82,6 @@ child_data = [
         "country": "Chile",
         "year": 2023,
         "area_ha": 1406900,
-        "percentage": 1.89,
         "__parent": 1,
         "__depth": 1,
     },
@@ -99,14 +91,19 @@ child_data = [
         "country": "Ecuador",
         "year": 2023,
         "area_ha": 1028000,
-        "percentage": 4.11,
         "__parent": 1,
         "__depth": 1,
     },
 ]
 
-# Calculate aggregates for the parent row
+# Calculate total area first
 total_area = sum(row["area_ha"] for row in child_data)
+
+# Now calculate percentage for each country (area / total * 100)
+for row in child_data:
+    row["percentage"] = (row["area_ha"] / total_area) * 100
+
+# Calculate average percentage for parent
 avg_percentage = sum(row["percentage"] for row in child_data) / len(child_data)
 
 # Create parent row with calculated aggregates
@@ -227,6 +224,8 @@ with col2:
 
 with col3:
     st.metric("Average Percentage", f"{avg_percentage:.2f}%")
+
+st.caption("💡 Percentage shows each country's area as % of total South American area")
 
 # Show clicked row details
 if result is not None:
