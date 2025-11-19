@@ -7,12 +7,43 @@ from streamlit_slickgrid import (
     StreamlitSlickGridFormatters,
 )
 
-st.set_page_config(layout="wide", page_title="South America Data")
+st.set_page_config(layout="wide", page_title="Americas Data")
 
 st.title("Americas Agricultural Data 2023")
 
-# Sample data based on the image - children first (without percentages initially)
-child_data = [
+# Sample data - North America children
+north_america_children = [
+    {
+        "id": 102,
+        "region": "North America",
+        "country": "United States",
+        "year": 2023,
+        "area_ha": 157736800,
+        "__parent": 101,
+        "__depth": 1,
+    },
+    {
+        "id": 103,
+        "region": "North America",
+        "country": "Canada",
+        "year": 2023,
+        "area_ha": 62420000,
+        "__parent": 101,
+        "__depth": 1,
+    },
+    {
+        "id": 104,
+        "region": "North America",
+        "country": "Mexico",
+        "year": 2023,
+        "area_ha": 24500000,
+        "__parent": 101,
+        "__depth": 1,
+    },
+]
+
+# Sample data - South America children
+south_america_children = [
     {
         "id": 2,
         "region": "South America",
@@ -96,30 +127,52 @@ child_data = [
     },
 ]
 
-# Calculate total area first
-total_area = sum(row["area_ha"] for row in child_data)
+# Calculate total area for North America
+na_total_area = sum(row["area_ha"] for row in north_america_children)
 
-# Now calculate percentage for each country (area / total * 100)
-for row in child_data:
-    row["percentage"] = (row["area_ha"] / total_area) * 100
+# Calculate percentage for each North American country
+for row in north_america_children:
+    row["percentage"] = (row["area_ha"] / na_total_area) * 100
 
-# Calculate average percentage for parent
-avg_percentage = sum(row["percentage"] for row in child_data) / len(child_data)
+# Calculate average percentage for North America parent
+na_avg_percentage = sum(row["percentage"] for row in north_america_children) / len(north_america_children)
 
-# Create parent row with calculated aggregates
-parent_row = {
-    "id": 1,
-    "region": "South America",
-    "country": "South America",
+# Create North America parent row
+north_america_parent = {
+    "id": 101,
+    "region": "North America",
+    "country": "North America",
     "year": 2023,
-    "area_ha": total_area,  # Calculated aggregate
-    "percentage": avg_percentage,  # Calculated aggregate
+    "area_ha": na_total_area,
+    "percentage": na_avg_percentage,
     "__parent": None,
     "__depth": 0,
 }
 
-# Combine parent and children
-data = [parent_row] + child_data
+# Calculate total area for South America
+sa_total_area = sum(row["area_ha"] for row in south_america_children)
+
+# Calculate percentage for each South American country
+for row in south_america_children:
+    row["percentage"] = (row["area_ha"] / sa_total_area) * 100
+
+# Calculate average percentage for South America parent
+sa_avg_percentage = sum(row["percentage"] for row in south_america_children) / len(south_america_children)
+
+# Create South America parent row
+south_america_parent = {
+    "id": 1,
+    "region": "South America",
+    "country": "South America",
+    "year": 2023,
+    "area_ha": sa_total_area,
+    "percentage": sa_avg_percentage,
+    "__parent": None,
+    "__depth": 0,
+}
+
+# Combine all data: both parents and all children
+data = [north_america_parent] + north_america_children + [south_america_parent] + south_america_children
 
 # Define colors
 red = "#ff4b4b"
@@ -184,7 +237,7 @@ columns = [
             "maxDecimal": 2,
             "numberSuffix": "%",
             "min": 0,
-            "max": 15,
+            "max": 100,
         },
     },
 ]
@@ -207,25 +260,44 @@ options = {
 }
 
 # Display the grid
-result = slickgrid(data, columns, options, key="south_america_grid")
+result = slickgrid(data, columns, options, key="americas_grid")
 
 # Display summary statistics
 st.divider()
 
 st.subheader("📊 Summary Statistics")
 
+col1, col2 = st.columns(2)
+
+with col1:
+    st.write("**North America**")
+    st.metric("Countries", len(north_america_children))
+    st.metric("Total Area", f"{na_total_area:,.1f} ha")
+    st.metric("Avg Percentage", f"{na_avg_percentage:.2f}%")
+
+with col2:
+    st.write("**South America**")
+    st.metric("Countries", len(south_america_children))
+    st.metric("Total Area", f"{sa_total_area:,.1f} ha")
+    st.metric("Avg Percentage", f"{sa_avg_percentage:.2f}%")
+
+# Grand totals
+st.divider()
+grand_total_area = na_total_area + sa_total_area
+total_countries = len(north_america_children) + len(south_america_children)
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.metric("Total Countries", len(child_data))
+    st.metric("🌎 Total Countries", total_countries)
 
 with col2:
-    st.metric("Total Area (Sum)", f"{total_area:,.1f} ha")
+    st.metric("🌎 Grand Total Area", f"{grand_total_area:,.1f} ha")
 
 with col3:
-    st.metric("Average Percentage", f"{avg_percentage:.2f}%")
+    st.metric("🌎 Average Area per Country", f"{grand_total_area/total_countries:,.1f} ha")
 
-st.caption("💡 Percentage shows each country's area as % of total South American area")
+st.caption("💡 Percentage shows each country's area as % of its region's total area")
 
 # Show clicked row details
 if result is not None:
