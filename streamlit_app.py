@@ -9,7 +9,7 @@ from streamlit_slickgrid import (
 
 st.set_page_config(layout="wide", page_title="Americas Data")
 
-st.title("Americas Agricultural Data 2023")
+st.title("🌎 Americas Agricultural Data 2023")
 
 # Sample data - North America children
 north_america_children = [
