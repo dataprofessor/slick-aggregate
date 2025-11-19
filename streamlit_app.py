@@ -11,18 +11,8 @@ st.set_page_config(layout="wide", page_title="South America Data")
 
 st.title("South America Agricultural Data 2023")
 
-# Sample data based on the image
-data = [
-    {
-        "id": 1,
-        "region": "South America",
-        "country": None,
-        "year": 2023,
-        "area_ha": 40387343.1,
-        "percentage": 4.76,
-        "__parent": None,
-        "__depth": 0,
-    },
+# Sample data based on the image - children first
+child_data = [
     {
         "id": 2,
         "region": "South America",
